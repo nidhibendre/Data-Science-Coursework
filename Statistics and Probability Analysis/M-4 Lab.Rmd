@@ -1,0 +1,303 @@
+---
+title: "M4-Lab"
+author: "Nidhi Bendre"
+date: "2023-01-31"
+output: pdf_document
+---
+
+## 0.
+
+Install and load the tidyverse package.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 1. 
+Let’s start by defining the following terms in both English and Probability:
+
+1. Prevalence: the probability of having disease (Prevalence = P(D+)) and the                    complement of prevalence is the probability of not having a                      disease (P(D-)=1−P(D+))
+
+2. Sensitivity: the conditional probability of testing positive given they have                  the disease (written as P(T+ | D+))
+
+3. Specificity: the conditional probability of testing negative given they do not                 have the disease (written as P(T- | D-))
+
+4. Positive Predictive Value: if tested positive, the probability of actually                                  having the disease (P(D+ | T+))
+
+5. Negative Predictive Value: if tested negative, the probability of actually                                  not having the disease (P(D- | T-))
+
+
+## 2.
+In an attempt to avoid hospitalization of patients with chest pain but not infarction, several investigators developed a clinical criteria to better predict the presence of MI. The validity of this new criteria was compared against the gold standard to determine presence of MI including electrocardiographic (ECG) changes, elevated serum levels of cardiac enzymes, or abnormalities in radionuclide testing. 
+
+```{r}
+tb <- as.table(matrix(c(50,91, 5, 211), 
+                      nrow = 2, byrow = TRUE)) 
+colnames(tb) <- c("MI+", "MI-") 
+rownames(tb) <- c("ER+", "ER-") 
+tb <- addmargins(tb, quiet = TRUE) 
+print(tb)
+```
+A. Calculate the prevalence of MI in this population.
+
+```{r}
+prevelance2 <- round((50+5) / (50+5+91+211), 2)
+paste("Prevalance of MI in the population:", prevelance2)
+```
+
+B. Calculate the sensitivity of the ER criteria as a test for MI.
+
+```{r}
+sensitivity2 <- round((50) / (50+5), 2)
+paste("Sensitivity of the ER criteria as a test for MI:", sensitivity2)
+```
+
+C. Calculate the specificity of the ER criteria as a test for MI.
+
+```{r}
+specificity2 <- round((211) / (91+211), 2)
+paste("Specificity of the ER criteria as a test for MI:", specificity2)
+```
+
+D. What is the probability that someone with an MI will be categorized as “Negative” by the ER criteria?
+
+```{r}
+f_negative2 <- round((5) / (50+5), 2)
+paste("Probability of false negative:", f_negative2) 
+```
+
+E. What is the probability that someone without MI will be categorized as “Positive” by the ER criteria?
+
+```{r}
+f_positive2 <- round((91) / (91+211), 2)
+paste("Probability of false negative:", f_positive2)
+```
+
+
+F. Given someone has been categorized as “Positive” by the ER criteria, what is the probability that they actually have an MI?
+
+```{r}
+PPV2 <- round((50) / (91+50), 2)
+paste("the Positive Predictive Value:", PPV2)
+```
+
+G.Given someone has been categorized as “Negative” by the ER criteria, what is the probability that they actually do not have an MI? 
+
+```{r}
+NPV2 <- round((211) / (211+5), 2)
+paste("the Negative Predictive Value:", NPV2)
+```
+
+H. In an attempt to capture more patients with potential MI, it is suggested that this ER criteria should be applied to all patients presenting to the ER. What are the implications of this decision?
+Applying the ER criteria to all patients means that more patients will be screened for MI in general. The clearest implication of this is that it will lead to increased costs on the hospital's as well patient's side when it is unnecessary. Additionally, if more population is screened, then the data will show low prevalence for MI which means that the PPV will be lower as well, which isn't ideal. Overall, it isn't the best strategy to implement the ER criteria to all patients. 
+
+
+## 3.
+study was conducted among 2188 patients suspected of Alzheimer’s disease who were evaluated at autopsy for Alzheimer’s disease by previously established
+pathological criteria. Patients were also evaluated clinically for the presence of Alzheimer’s disease, using information related to their APOE expression.
+```{r}
+tb <- as.table(matrix(c(1643,190, 127, 228), 
+                      nrow = 2, byrow = TRUE)) 
+colnames(tb) <- c(" AD (D+)", "DT (D-)") 
+rownames(tb) <- c("AD (T+)", "DT (T-)") 
+tb <- addmargins(tb, quiet = TRUE) 
+print(tb)
+```
+
+A. What is the estimate of the prevalence of Alzheimer’s disease in this sample?
+
+```{r}
+prevelance3 <- round((1643+127) / (1643+127+190+228), 3)
+paste("Prevalance of Alzheimer’s disease in the population:", prevelance3)
+``` 
+
+B. If the clinical diagnosis using APOE is considered to as a screening test for Alzheimer’s disease, what is the sensitivity of this test?
+  
+```{r}
+sensitivity3 <- round((1643) / (1643+127), 3)
+paste("Sensitivity of APOE diagnosis:", sensitivity3)
+```  
+
+C. What is the specificity of this test?
+  
+```{r}
+specificity3 <- round((228) / (228+190), 3)
+paste("Specificity of of APOE diagnosis:", specificity3)
+```  
+
+D. What is the positive predictive value (PPV) of this test?
+
+```{r}
+PPV3 <- round((1643) / (1643+190), 3)
+paste("positive predictive value of of APOE diagnosis:", PPV3)
+```  
+
+E. What is the negative predictive value (NPV) of this test?
+
+```{r}
+NPV3 <- round((228) / (228+127), 3)
+paste("negative predictive value of of APOE diagnosis:", NPV3)
+```  
+
+
+## 4.
+To get a more accurate measure of whether a pregnant person can be classified as a “current smoker” researchers suggest measuring the level of saliva thiocyanate (SCN), considering those with a SCN > 100 as a positive test. To evaluate this test, SCN measurements were taken from a random sample self-reported smokers and non-smokers.
+```{r}
+tb <- as.table(matrix(c(29,317, 203, 28), 
+                      nrow = 2, byrow = TRUE)) 
+colnames(tb) <- c(" Smoker (D+)", "Non-Smoker (D-)") 
+rownames(tb) <- c("SCN <= 100 (T+)", "SCN > 100 (T-)") 
+tb <- addmargins(tb, quiet = TRUE) 
+print(tb)
+```
+A. Calculate sensitivity.
+
+```{r}
+sensitivity4 <- round((29) / (29+203), 3)
+paste("Sensitivity of SCN diagnosis:", sensitivity4)
+``` 
+
+B. Calculate specificity.
+  
+```{r}
+specificity4 <- round((317) / (317+28), 3)
+paste("Specificity of of SCN diagnosis:", specificity4)
+```  
+
+C. Calculate PPV.
+  
+```{r}
+PPV4 <- round((29) / (29+317), 3)
+paste("positive predictive value of of SCN diagnosis:", PPV4)
+```  
+
+D. Calculate NPV.
+
+```{r}
+NPV3 <- round((28) / (28+203), 3)
+paste("negative predictive value of of SCN diagnosis:", NPV3)
+```  
+
+
+## 5.
+Suppose the prevalence of disease in your population is 0.05. Sensitivity of your test to detect disease is 0.9 and specificity is 0.95.
+ 
+                          4500 tested positive
+            5000 diseased
+                          500 tested negative
+100000 pop
+                            4750 tested positive
+          95000 non-diseased
+                            90250 tested negative
+                            
+                          7.7 tested positive
+            10 diseased
+                          2.3 tested negative
+100 pop
+                            37.8 tested positive
+          90 non-diseased
+                            52.2 tested negative
+                            
+```{r}
+PPV5A <- round((7.7) / (7.7+37.8), 2)
+paste("positive predictive value of when prevalence is 0.05:", PPV5A)
+```                             
+                            
+```{r}
+tb <- as.table(matrix(c(4500,4750, 500, 90250), 
+                      nrow = 2, byrow = TRUE)) 
+colnames(tb) <- c(" D+", "D-") 
+rownames(tb) <- c("T+", "T-") 
+tb <- addmargins(tb, quiet = TRUE) 
+print(tb)
+```     
+A. Using a hypothetical population of 100,000 people and the tree-branching method described in the slides for the breast cancer example, calculate the positive predictive value of this test.
+
+```{r}
+PPV5A <- round((4500) / (4500+4750), 3)
+paste("positive predictive value of when prevalence is 0.05:", PPV5A)
+``` 
+
+B. Change the Prevalence to 0.1. What is the PPV?
+                          9000 tested positive
+          10000 diseased
+                          1000 tested negative
+100000 pop
+                            4500 tested positive
+          90000 non-diseased
+                            85500 tested negative
+```{r}
+tb <- as.table(matrix(c(9000,4500, 1000, 85500), 
+                      nrow = 2, byrow = TRUE)) 
+colnames(tb) <- c(" D+", "D-") 
+rownames(tb) <- c("T+", "T-") 
+tb <- addmargins(tb, quiet = TRUE) 
+print(tb)
+```  
+  
+```{r}
+PPV5B <- round((9000) / (9000+4500), 3)
+paste("positive predictive value of when prevalence is 0.1:", PPV5B)
+```  
+
+C. Change the Prevalence to 0.25. What is the PPV?
+
+                          22500 tested positive
+          25000 diseased
+                          2500 tested negative
+100000 pop
+                            3750 tested positive
+          75000 non-diseased
+                            71250 tested negative
+```{r}
+tb <- as.table(matrix(c(22500,3750, 2500, 71250), 
+                      nrow = 2, byrow = TRUE)) 
+colnames(tb) <- c(" D+", "D-") 
+rownames(tb) <- c("T+", "T-") 
+tb <- addmargins(tb, quiet = TRUE) 
+print(tb)
+```  
+  
+```{r}
+PPV5C <- round((22500) / (22500+3750), 3)
+paste("positive predictive value of when prevalence is 0.25:", PPV5C)
+```   
+
+D. What is the pattern you see between prevalence and PPV?
+Prevalence and PPV are positively correlated; when prevalence rates increase, PPV increases as well.   
+
+
+## 6.
+
+A. Suppose you decide that you need 0 radiologists to classify an X-ray as Lung Cancer Positive for you to make a diagnosis of Lung Cancer. This means that everyone, regardless of their X-ray will be classified as Lung Cancer Positive. What would be the sensitivity and specificity of this testing procedure?
+If 0 radiologists were involved in determining the presence of lung cancer, then the sensitivity of the procedure will be really high (1) as everyone tests positive. The specificity on the other hand will be really low (0) as no one would test negative. 
+
+
+B. Suppose, on the other extreme, you mistakenly determine that you will need 5 radiologists to agree on a Lung Cancer Positive X-ray in order to make a diagnosis. This means that everyone will be classified as Lung Cancer negative, regardless of their X-ray result. What would be the sensitivity and specificity of this test?
+On the other extreme, the sensitivity and specificity will be the opposite; sensitivity will be really low (0) as no one tests positive whil specificity will be really high (1) as everyone tests negative.
+
+
+C. Based on your research and experimentation, you determine the following sensitivities and specificities associated with varying the number of radiologists that must agree from N = 1 to N = 5.Using the sample code above that was used to generate this “tibble” of data, add your answers to parts A and B to include the sensitivity and specificity values for 0 and 5 radiologist agreements. Print this tibble using print(LungCancer).
+```{r}
+LungCancer<- tibble(NumAgree = c(0,1,2,3,4,5),
+Sensitivity = c(1,0.95, 0.87, 0.75, 0.64,0),
+Specificity = c(0,0.57, 0.73, 0.89, 0.96,1))
+colnames(LungCancer) = c("Test Positive Criteria",
+"Sensitivity", "Specificity")
+print(LungCancer)
+```
+
+D. A standard method for choosing the best classification rule is visualize your procedure via a Receiver Operator Characteristic Curve, often called an “ROC Curve.” An ROC Curve plots the sensitivity on the y-axis and (1-specificity) on the x-axis. Create a line plot showing the ROC Curve for your testing procedure.
+Once you have your line plot, use + geom_point() to add points (and make the points “red” so you can see them) corresponding to each testing criteria. Add appropriate labels for axes and titles.
+```{r}
+ggplot(data = LungCancer) +
+  geom_line(aes(x = 1-Specificity, y = Sensitivity, )) +
+  labs(x = "Specificity Complement", y = "Sensitivity",
+       title = "Receiver Operator Characteristic Curve") + 
+  geom_point(aes(x = 1-Specificity, y = Sensitivity), color='red')
+
+```
+
+E. Given that the best testing procedure possible would have 100% sensitivity and 100% specificity, based on the ROC Curve, which test criteria would you pick for your diagnoses?
+The most ideal test criteria based on the ROC Curve is test positive criteria 2, where the sensitivity is 0.75 and specificity is 0.89, because both values here are close to 1 and the difference between them is not much. 

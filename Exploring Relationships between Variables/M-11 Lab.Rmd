@@ -1,0 +1,175 @@
+---
+title: "M-11 Lab"
+author: "Nidhi Bendre"
+date: "2023-04-05"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(infer)
+library(NHANES)
+library(broom)
+set.seed(1223)
+```
+
+## 1. The relationship between Age and BMI
+
+A. Which variable do you think should be the explanatory variable, which should be the response? Think about which of these might explain the other.
+The explanatory variable is age, as it can explain the changes in BMI over time, while BMI is the response.
+
+B. Take a sample of 50 adults and plot their Age vs BMI. Describe the plot and state whether or not you think a relationship exists.
+```{r}
+sample <- NHANES %>%
+  filter(!is.na(Age), !is.na(BMI)) %>%
+  sample_n(50)
+  
+sample %>%
+  ggplot() +
+  geom_point(aes(x = Age, y = BMI)) +
+  labs(x = "Age", y = "BMI",
+       title = "Age vs. BMI")
+
+# Based on the graph below, there doesn't seem to be any correlation between age and BMI.  
+```
+
+C. Calculate and interpret the correlation between Age and BMI in your sample. Don’t forget, when
+calculating the correlation with the “cor()” function you need to specify what to do about missing values (NAs). I usually specify use = "pairwise.complete" which means R will use all of the pairs of Age and BMI where both values are present and will exclude any pairs missing either Age or BMI.
+```{r}
+corr <- sample %>%
+  summarise(correlation = cor(Age, BMI, use = "pairwise.complete"))
+
+corr
+```
+
+D. Use a formal hypothesis test to decide at the 5% level if a linear relationship exists between Age and BMI. Complete all steps of the hypothesis test (i.e. State your null and alternative, give a conclusion in complete sentences.) Think about what the null would be: What would the value of ρ equal if there was no linear relationship? 
+Ho: ρ = 0 (no linear relationship)
+Ha: ρ  != 0 (linear relationship)
+```{r}
+# sample collected in B, observed stat (correlation) calculated in C
+
+# Null distribution
+NullDist <- sample %>% 
+  specify(formula = BMI ~ Age) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "correlation")
+
+NullDist %>%
+  visualize() +
+  shade_p_value(obs_stat = corr, direction = "two-sided")
+
+# get p-value
+NullDist %>%
+  get_p_value(obs_stat = corr, direction ="two-sided")
+
+# The p-value of 0 is less than the α level of 0.05, which means that we have sufficient evidence to reject the null hypothesis and conclude that there is a linear relationship between age and BMI.
+```
+
+E. Create and interpret 95% a confidence interval for the true population level parameter describing the correlation between Age and BMI.
+```{r}
+#bootstrap confidence interval
+boots <- sample %>%
+  specify(formula = BMI ~ Age) %>%
+  generate(reps = 500, type = "bootstrap") %>%
+  calculate(stat = "correlation")
+
+ci_se <- get_ci(boots, level = 0.95, type = "se", point_estimate = corr)
+ci_se
+
+# interpret: The above confidence interval agrees with the hypothesis test where the null is rejected because 0 is not included in the interval.
+```
+
+F. Calculate the correlation for the entire NHANES population (not just your sample). Usually we can’t see this population value. Did you make the correct conclusion from your hypothesis test? Did your confidence interval cover the true correlation?
+
+```{r}
+NHANES %>%
+  summarise(correlation = cor(Age, BMI, use = "pairwise.complete"))
+```
+
+
+## 2. Fitting a line
+A. Using the lm(Y ~ X, data = Dataset) function, fit a model that regresses your explanatory variable onto your response variable. Use the sample of 50 people you took above as the dataset. Store this in a variable called model1. Use summary(model1) to examine the output of model1.
+```{r}
+model1 <- lm(BMI ~ Age, data = sample)
+summary(model1)
+```
+
+B. Using tidy() from the broom package, examine the output of tidy(model1) and use this output to write out the equation of the estimated regression line.
+```{r}
+tidy(model1)
+
+# based on the output, the intercept is 20.9625 and the slope is 0.1671, so the equation of the regression line is y = 0.1671x + 20.9625
+```
+
+C. What is your estimate and interpretation of the slope of your line?
+The estimate for the slope is 0.1671. This means that for every one unit increase in Age, the BMI is estimated to increase by 0.1671 units; this shows there is a positive linear relationship between Age and BMI.
+
+D. What is your estimate and interpretation of the intercept of your line?
+The intercept estimate for the line is 20.96. This can be interpreted as the expected value of the response variable (BMI) when the explanatory variable (Age) is equal to 0. 
+
+E. Previously you used ggplot() + geom_point() to create a scatterplot of Y vs X. In the same call, we can add our regression line to the plot. Use geom_smooth(aes(X=___, Y=___), method = "lm", se = FALSE) to add the line. The aes() statement indicates what the formula of the line will be. method = "lm" indicates the type of line you want to fit: we want a ‘linear model.’ The se=FALSE will plot just the line (se = TRUE adds a line-wise confidence interval that we will talk about later.)
+```{r}
+ggplot(data = sample, aes(x = Age, y = BMI)) + 
+  geom_point() + 
+  geom_smooth(aes(x = Age, y = BMI), method = "lm", se = FALSE)
+```
+
+F. Using the equation of the line, what is the predicted BMI for a person who is 25 years old?
+```{r}
+(0.1671*25) + 20.9625
+
+# predicted BMI is 25.14 for a person of age 25.
+```
+
+G. Using the equation of the line, what is the predicted BMI for a person who is 65 years old?
+```{r}
+(0.1671*65) + 20.9625
+
+# predicted BMI is 31.824 for a person of age 65.
+```
+
+
+## 3. The relationship between Alcohol Consumption and Total Household Income
+
+A. Which variable do you think should be the explanatory variable, which should be the response? Think about which of these might explain the other?
+alcohol consumption will be the explanatory variable while total household income would be the response.
+
+B. Take a sample of 50 adults and select() AlcoholYear, HHIncomeMid. Plot AlcoholYear vs HHIncomeMid. Describe the plot and state whether or not you think a relationship exists.
+```{r}
+sample1 <- NHANES %>%
+  filter(!is.na(AlcoholYear), !is.na(HHIncomeMid)) %>%
+  sample_n(50) %>%
+  select(AlcoholYear, HHIncomeMid) 
+  
+sample1 %>%
+  ggplot() +
+  geom_point(aes(x = AlcoholYear, y = HHIncomeMid)) +
+  labs(x = "AlcoholYear", y = "HHIncomeMid",
+       title = "# of days alcohol is consumed in a year vs. the income for that year")
+```
+
+C. What is your estimate of the correlation between Alcohol consumption and Household income?
+```{r}
+corr1 <- sample1 %>%
+  summarise(correlation = cor(AlcoholYear, HHIncomeMid, use = "pairwise.complete"))
+
+corr1
+```
+
+D. Construct and interpret a 95% confidence interval for the true correlation. Do you think a hypothesis test examining: H0 : ρ = 0HA : ρ 6 = 0 would reject the null at the α level of 5%?
+```{r}
+boots1 <- sample1 %>%
+  specify(formula = HHIncomeMid ~ AlcoholYear) %>%
+  generate(reps = 500, type = "bootstrap") %>%
+  calculate(stat = "correlation")
+
+ci_se1 <- get_ci(boots1, level = 0.95, type = "se", point_estimate = corr1)
+ci_se1
+
+# This interval does include 0, so we would fail to reject the null at the α level of 5%.
+```
+
